@@ -1,0 +1,69 @@
+﻿<br />
+
+  <!--<h1>Home</h1>-->
+  <div class="thumbnail col-xs-9 col-sm-10 col-md-10 col-lg-12">
+    <div ng-show='currentUser'>
+      <br /><div id="welcomeMessage">Hello {{currentUser.pubData.firstName}} {{currentUser.pubData.lastName}}</div>
+    </div>
+
+
+    <!--<body ng-app="MyItemsApiAPP">-->
+    <!--<div class="container" ng-controller="MyItemsApiController">-->
+
+
+
+
+
+
+    <div ng-show="favorites.length > 0">
+
+      <table class="table">
+        <tr><td colspan="4" id="tableTitle">Favorites</td></tr>
+        <tr>
+          <th colspan="4">
+            <button ng-click="saveFavorites(favorites)" class="btn btn-success center-block" ng-show="currentUser">
+              <span class="glyphicon glyphicon-floppy-disk"></span> Save to profile
+            </button>
+          </th>
+        </tr>
+        <tbody>
+          <tr ng-repeat="book in favorites">
+            <td><img ng-src="{{book.volumeInfo.imageLinks.smallThumbnail}}" class="searchImg"></td>
+            <td>{{book.volumeInfo.title}}</td>
+            <td>{{book.volumeInfo.author}}</td>
+            <td>
+              <button ng-click="removeFavorite(book)" class="btn btn-danger pull-right">
+                <span class="glyphicon glyphicon-remove"></span> Remove
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+   
+
+
+
+
+    <table class="table">
+      <tbody>
+        <tr ng-repeat="book in books">
+          <td><img ng-src="{{book.volumeInfo.imageLinks.smallThumbnail}}" class="searchImg"></td>
+          <td>{{book.volumeInfo.title}}</td>
+          <td>{{book.volumeInfo.author}}</td>
+          <!--<td>{{book.author}}</td>-->
+          <td>
+            <button ng-click="addToFavorites(book)" class="btn btn-warning pull-right">
+              <span class="glyphicon glyphicon-plus"></span> Add
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <!--  </div>
+  </body>-->
+ 
+
+

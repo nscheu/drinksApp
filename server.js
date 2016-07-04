@@ -1,159 +1,270 @@
-#!/bin/env node
-//  OpenShift sample Node application
-var express = require('express');
-var fs      = require('fs');
+﻿var express = require('express');
+var bodyParser = require('body-parser');
+var multer = require('multer');
+var app = express();
+var mongoose = require('mongoose');
+var passport = require('passport');
+var cookieParser = require('cookie-parser');
+var session = require('express-session');
+var LocalStrategy = require('passport-local').Strategy;
 
+var connectionString = process.env.OPENSHIFT_MONGODB_DB_URL || 'mongodb://localhost/';
+var db = mongoose.connect(connectionString);
 
-/**
- *  Define the sample application.
- */
-var SampleApp = function() {
+// SCHEMA ********************************
 
-    //  Scope.
-    var self = this;
+var UserSchema = new mongoose.Schema({
+  username: String,
+  password: String,
+  email: String,
+  user_id: String,
+  user_first_name: String,
+  user_last_name: String,
+  item_list: [String],
+  location_list: [String]
+});
 
+var ItemSchema = new mongoose.Schema({
+  item_id: String,
+  item_name: String,
+  item_description: String,
+  user_id: String
+});
 
-    /*  ================================================================  */
-    /*  Helper functions.                                                 */
-    /*  ================================================================  */
+var LocationSchema = new mongoose.Schema({
+  location_id: String,
+  location_name: String,
+  location_description: String,
+  user_id: String
+});
 
-    /**
-     *  Set up server IP address and port # using env variables/defaults.
-     */
-    self.setupVariables = function() {
-        //  Set the environment variables we need.
-        self.ipaddress = process.env.OPENSHIFT_NODEJS_IP;
-        self.port      = process.env.OPENSHIFT_NODEJS_PORT || 8080;
+// DEFINE MONGOOSE MODELS
+var UserModel = mongoose.model('UserModel', UserSchema);
+var ItemModel = mongoose.model('ItemModel', ItemSchema);
+var LocationModel = mongoose.model('LocationModel', LocationSchema);
 
-        if (typeof self.ipaddress === "undefined") {
-            //  Log errors on OpenShift but continue w/ 127.0.0.1 - this
-            //  allows us to run/test the app locally.
-            console.warn('No OPENSHIFT_NODEJS_IP var, using 127.0.0.1');
-            self.ipaddress = "127.0.0.1";
-        };
-    };
+// SET THE MODULES
+app.use(bodyParser.json()); // for parsing application/json
+app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
+app.use(multer()); // for parsing multipart/form-data
+app.use(session({ secret: 'this is the secret' }));
+app.use(cookieParser());
+app.use(passport.initialize());
+app.use(passport.session());
+app.use(express.static(__dirname + '/public'));// GET /style.css etc
 
+// PASSPORT FUNCTIONS
+passport.use(new LocalStrategy(
+  function (username, password, done) {
+    //CALL TO DATABASE AND VERIFY THAT USERNAME/PASSWORD MATCH A VALUE
+    UserModel.findOne({username: username, password: password}, function (err, user) {
+      //console.log(docs);
+      if (user) {
+        return done(null, user);
+      }
+      return done(null, false, { message: 'Unable to login' });
+    });
+    
+  }));
 
-    /**
-     *  Populate the cache.
-     */
-    self.populateCache = function() {
-        if (typeof self.zcache === "undefined") {
-            self.zcache = { 'index.html': '' };
-        }
+passport.serializeUser(function (user, done) {
+  done(null, user);
+});
 
-        //  Local cache for static content.
-        self.zcache['index.html'] = fs.readFileSync('./index.html');
-    };
+passport.deserializeUser(function (user, done) {
+  done(null, user);
+});
 
-
-    /**
-     *  Retrieve entry (content) from cache.
-     *  @param {string} key  Key identifying content to retrieve from cache.
-     */
-    self.cache_get = function(key) { return self.zcache[key]; };
-
-
-    /**
-     *  terminator === the termination handler
-     *  Terminate server on receipt of the specified signal.
-     *  @param {string} sig  Signal to terminate on.
-     */
-    self.terminator = function(sig){
-        if (typeof sig === "string") {
-           console.log('%s: Received %s - terminating sample app ...',
-                       Date(Date.now()), sig);
-           process.exit(1);
-        }
-        console.log('%s: Node server stopped.', Date(Date.now()) );
-    };
-
-
-    /**
-     *  Setup termination handlers (for exit and a list of signals).
-     */
-    self.setupTerminationHandlers = function(){
-        //  Process on exit and signals.
-        process.on('exit', function() { self.terminator(); });
-
-        // Removed 'SIGPIPE' from the list - bugz 852598.
-        ['SIGHUP', 'SIGINT', 'SIGQUIT', 'SIGILL', 'SIGTRAP', 'SIGABRT',
-         'SIGBUS', 'SIGFPE', 'SIGUSR1', 'SIGSEGV', 'SIGUSR2', 'SIGTERM'
-        ].forEach(function(element, index, array) {
-            process.on(element, function() { self.terminator(element); });
-        });
-    };
-
-
-    /*  ================================================================  */
-    /*  App server functions (main app logic here).                       */
-    /*  ================================================================  */
-
-    /**
-     *  Create the routing table entries + handlers for the application.
-     */
-    self.createRoutes = function() {
-        self.routes = { };
-
-        self.routes['/asciimo'] = function(req, res) {
-            var link = "http://i.imgur.com/kmbjB.png";
-            res.send("<html><body><img src='" + link + "'></body></html>");
-        };
-
-        self.routes['/'] = function(req, res) {
-            res.setHeader('Content-Type', 'text/html');
-            res.send(self.cache_get('index.html') );
-        };
-    };
-
-
-    /**
-     *  Initialize the server (express) and create the routes and register
-     *  the handlers.
-     */
-    self.initializeServer = function() {
-        self.createRoutes();
-        self.app = express.createServer();
-
-        //  Add handlers for the app (from the routes).
-        for (var r in self.routes) {
-            self.app.get(r, self.routes[r]);
-        }
-    };
-
-
-    /**
-     *  Initializes the sample application.
-     */
-    self.initialize = function() {
-        self.setupVariables();
-        self.populateCache();
-        self.setupTerminationHandlers();
-
-        // Create the express server and routes.
-        self.initializeServer();
-    };
-
-
-    /**
-     *  Start the server (starts up the sample application).
-     */
-    self.start = function() {
-        //  Start the app on the specific interface (and port).
-        self.app.listen(self.port, self.ipaddress, function() {
-            console.log('%s: Node server started on %s:%d ...',
-                        Date(Date.now() ), self.ipaddress, self.port);
-        });
-    };
-
-};   /*  Sample Application.  */
+var auth = function (req, res, next) {
+  if (!req.isAuthenticated())
+    res.send(401);
+  else
+    next();
+};
 
 
 
-/**
- *  main():  Main code.
- */
-var zapp = new SampleApp();
-zapp.initialize();
-zapp.start();
+// API USER CRUD *************************************************************
+// CREATE
+app.post('/create', function (req, res) {
+  UserModel.findOne({ username: req.body.username }, function (err, user) {
+    if (user) {
+      res.send(200);
+    }
+    else {
+      var newUser = new UserModel(req.body);
 
+      newUser.save(function (err, user) {
+        req.login(user, function (err) {
+          if (err) { return next(err); }
+          res.json(user);
+        });        
+      });
+    }
+  });
+  var newUser = req.body;
+});
+
+// READ
+app.get('/rest/user', auth, function (req, res) {
+  UserModel.find(function (err, user) {
+    res.json(user);
+  });
+});
+
+
+// UPDATE
+app.post("/api/updateUser", auth, function (req, res) {
+  console.log("server - updateUser REST");
+  //console.log(req.body);
+  UserModel.findOneAndUpdate({ _id: req.body._id }, function (err, user) {
+    if (err) throw err;
+    // we have the updated user returned to us
+    res.json(user);
+  });
+});
+
+// DELETE
+app.post('/rest/delUser', auth, function (req, res) {
+  //console.log("server - delUser REST");
+  UserModel.remove({ _id: req.body._id }, function (err, users) {
+    res.json(users);
+  });
+});
+
+
+
+// API ITEM CRUD *************************************************************
+// CREATE 
+app.post('/createItem', function (req, res) {
+  console.log('createItem');
+  ItemModel.findOne({ item_name: req.body.item_name }, function (err, item) {
+    if (item) {
+      res.send(200);
+    }
+    else {
+      var newItem = new ItemModel(req.body);
+
+      newItem.save(function (err, item) {
+          if (err) { return next(err); }
+          res.json(item);
+      }); 
+    }
+  });
+});
+
+// READ
+app.post('/rest/item_list', auth, function (req, res) {
+  ItemModel.find({ user_id: req.body.user_id }, function (err, item_list) {
+    res.json(item_list);
+  });
+});
+
+// UPDATE
+app.post("/rest/updateItem", auth, function (req, res) {
+  console.log("server - updateItem REST");
+  console.log(req.body._id);
+  //var objId = "ObjectId(" + req.body._id + ")";
+  var query = {"_id": req.body._id};
+  ItemModel.findOneAndUpdate(query, req.body, {upsert: false}, function (err, item) {
+    if (err) throw err;
+    // we have the updated item returned to us
+    res.json(item);
+  });
+});
+
+// DELETE
+app.post('/rest/delItem', auth, function (req, res) {
+  //console.log("server - delItem REST");
+  ItemModel.remove({ _id: req.body._id }, function (err, items) {
+    console.log(items)
+    res.json(items);
+  });
+});
+
+// API LOCATION CRUD *************************************************************
+// CREATE 
+app.post('/createLocation', function (req, res) {
+  console.log('createLocation');
+  LocationModel.findOne({ location_name: req.body.location_name }, function (err, location) {
+    if (location) {
+      res.send(200);
+    }
+    else {
+      var newLocation = new LocationModel(req.body);
+
+      newLocation.save(function (err, location) {
+          if (err) { return next(err); }
+          res.json(location);
+      }); 
+    }
+  });
+});
+
+// READ
+app.post('/rest/location_list', auth, function (req, res) {
+  LocationModel.find({ user_id: req.body.user_id }, function (err, location_list) {
+    res.json(location_list);
+  });
+});
+
+// UPDATE
+app.post("/rest/updateLocation", auth, function (req, res) {
+  console.log("server - updateLocation REST");
+  console.log(req.body._id);
+  var query = {"_id": req.body._id};
+  LocationModel.findOneAndUpdate(query, req.body, {upsert: false}, function (err, location) {
+    if (err) throw err;
+    // we have the updated item returned to us
+    res.json(location);
+  });
+});
+
+// DELETE
+app.post('/rest/delLocation', auth, function (req, res) {
+  LocationModel.remove({ _id: req.body._id }, function (err, location) {
+    //console.log(location);
+    res.json(location);
+  });
+});
+
+
+
+
+
+
+
+
+
+
+// INVENTORY
+
+app.get('/hello', function (req, res) {
+  res.send('hello world');
+});
+
+// LOGIN MANAGMENT API
+
+app.post('/login', passport.authenticate('local'), function (req, res) {
+  console.log(req.user);
+  res.send(req.user);
+});
+
+app.get('/loggedin', function (req, res) {
+  res.send(req.isAuthenticated() ? req.user : '0');
+});
+
+app.post('/logout', function (req, res) {
+  req.logOut();
+  res.send(200);
+});
+
+
+
+
+
+
+var ip = process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1';
+var port = process.env.OPENSHIFT_NODEJS_PORT || 8000;
+
+app.listen(port, ip);

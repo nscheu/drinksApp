@@ -1,0 +1,31 @@
+﻿<br />
+
+<div class="container container-fluid">
+  <div class="thumbnail">
+    
+      <form class="form">
+        <h3>Login</h3><hr />
+        <div class="form-group">
+          <div class="col-xs-2 col-lg-1">
+            <label for="un">Username</label>
+          </div>
+          <div class="col-xs-offset-2 col-sm-offset-2 col-md-offset-2 col-lg-offset-2">
+            <input id="un" ng-model='user.username' placeholder="Username" />
+          </div>
+          </div>
+        <div class="form-group">
+          <div class="col-xs-2 col-lg-1">
+            <label for="pw">Password</label>
+            </div>
+          <div class="col-xs-offset-2 col-sm-offset-2 col-md-offset-2 col-lg-offset-2">
+            <input type="password" id="pw" ng-model='user.password' placeholder="Password" />
+          </div>
+          </div>
+        <div class="col-xs-offset-2 col-sm-offset-2 col-md-offset-2 col-lg-offset-2">
+          <div class="form-group">
+            <button class="btn btn-primary" ng-click='login(user)'>Login</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>

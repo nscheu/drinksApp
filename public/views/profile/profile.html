@@ -1,0 +1,303 @@
+﻿
+<br />
+
+<div class="container container-fluid">
+
+
+
+    
+
+
+    <div class="col-sm-12 col-md-12 col-lg-12">
+      <table class="table">
+        <thead>
+          <tr><th colspan="7" id="tableTitle"><h3>User Data Profile</h3></th></tr>
+          <tr>
+            <th>Username</th>
+            <th>ID</th>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Email</th>
+            <th>Number of Items</th>
+            <th>Actions</th>
+
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>{{currentUser.username}}</td>
+            <td>{{currentUser._id}}</td>
+            <td>{{currentUser.user_first_name}}</td>
+            <td>{{currentUser.user_last_name}}</td>
+            <td>{{currentUser.email}}</td>
+            <td>{{currentUser.item_list.length}}</td>
+            <td><button class="btn btn-warning pull-right" ng-click="openUpdateUserModal(currentUser)">Update
+                </button>
+				        <button class="btn btn-danger pull-right" ng-click="delUser(currentUser)">Delete</button>
+			     </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+
+    <div class="col-sm-12 col-md-12 col-lg-12">
+      <table class="table">
+        <thead>
+          <tr>
+            <th colspan="4" id="tableTitle"><h3>User Item Data</h3></th>
+            <th><button class="btn btn-success pull-right" ng-click="addItemModal(currentUser)">Add Item</button></th></tr>
+          <tr>
+            <th>ID</th>
+            <th>Item Name</th>
+            <th>Item Description</th>
+            <th>Item Owner</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr ng-repeat="item in currentUser.item_list">
+            <td>{{item._id}}</td>
+            <td>{{item.item_name}}</td>
+            <td>{{item.item_description}}</td>
+            <td>{{item.user_id}}</td>
+            <td><button class="btn btn-warning pull-right" ng-click="openUpdateItemModal(item)">Update
+                </button>
+                <button class="btn btn-danger pull-right" ng-click="delItem(item)">Delete</button>
+           </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+
+  <div class="col-sm-12 col-md-12 col-lg-12">
+      <table class="table">
+        <thead>
+          <tr>
+            <th colspan="4" id="tableTitle"><h3>User Location Data</h3></th>
+            <th><button class="btn btn-success pull-right" ng-click="addLocationModal(currentUser)">Add Location</button></th></tr>
+          <tr>
+            <th>ID</th>
+            <th>Location Name</th>
+            <th>Location Description</th>
+            <th>Item Owner</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr ng-repeat="loc in currentUser.location_list">
+            <td>{{loc._id}}</td>
+            <td>{{loc.location_name}}</td>
+            <td>{{loc.location_description}}</td>
+            <td>{{loc.user_id}}</td>
+            <td><button class="btn btn-warning pull-right" ng-click="openUpdateLocationModal(loc)">Update
+                </button>
+                <button class="btn btn-danger pull-right" ng-click="delLocation(loc)">Delete</button>
+           </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+
+
+
+
+
+
+    <!--Update Modal Below-->
+    <div class="modal fade" id="openUpdateLocationModal" tabindex="-1" role="dialog" aria-labelledby="openUpdateLocationModal" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+            <h4 class="modal-title">Edit Location</h4>
+          </div>
+          <div class="modal-body">
+            <form class="form form-horizontal" name="locationUpdateForm" id="locationUpdate-form">
+              <div class="form-group">
+                <label class="col-sm-3 control-label" for="name">Location Name</label>
+                <div class="col-sm-8">
+                  <input ng-model="updateLocation.location_name" id="name" name="name" type="text" class="form-control" placeholder="{{updateLocation.location_name}}" />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="col-sm-3 control-label" for="name">Location Descriptions</label>
+                <div class="col-sm-8">
+                  <input ng-model="updateLocation.location_description" id="name" name="name" type="text" class="form-control" placeholder="{{updateLocation.location_description}}" />
+                </div>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button ng-click="updateLocationInDb(updateLocation)" type="button" class="btn btn-primary">Ok</button>
+            <button type="button" data-dismiss="modal" class="btn btn-default">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+
+
+
+
+    <!--Update Modal Below-->
+    <div class="modal fade" id="openUpdateItemModal" tabindex="-1" role="dialog" aria-labelledby="openUpdateItemModal" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+            <h4 class="modal-title">Edit Item</h4>
+          </div>
+          <div class="modal-body">
+            <form class="form form-horizontal" name="itemUpdateForm" id="itemUpdate-form">
+              <div class="form-group">
+                <label class="col-sm-3 control-label" for="name">Item Name</label>
+                <div class="col-sm-8">
+                  <input ng-model="updateItem.item_name" id="name" name="name" type="text" class="form-control" placeholder="{{updateItem.item_name}}" />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="col-sm-3 control-label" for="name">Item Descriptions</label>
+                <div class="col-sm-8">
+                  <input ng-model="updateItem.item_description" id="name" name="name" type="text" class="form-control" placeholder="{{updateItem.item_description}}" />
+                </div>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button ng-click="updateItemInDb(updateItem)" type="button" class="btn btn-primary">Ok</button>
+            <button type="button" data-dismiss="modal" class="btn btn-default">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+
+
+
+    <!--Update Modal Below-->
+    <div class="modal fade" id="openUpdateUserModal" tabindex="-1" role="dialog" aria-labelledby="courseModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+            <h4 class="modal-title">Edit User</h4>
+          </div>
+          <div class="modal-body">
+            <form class="form form-horizontal" name="userUpdateForm" id="userUpdate-form">
+              <div class="form-group">
+                <label class="col-sm-3 control-label" for="name">First Name</label>
+                <div class="col-sm-8">
+                  <input ng-model="updateUser.user_first_name" id="name" name="name" type="text" class="form-control" placeholder="{{updateUser.user_first_name}}" />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="col-sm-3 control-label" for="name">Last Name</label>
+                <div class="col-sm-8">
+                  <input ng-model="updateUser.user_last_name" id="name" name="name" type="text" class="form-control" placeholder="{{updateUser.user_last_name}}" />
+                </div>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button ng-click="updateUserInDb(updateUser)" type="button" class="btn btn-primary">Ok</button>
+            <button type="button" data-dismiss="modal" class="btn btn-default">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+
+
+
+
+ <!--Update Modal Below-->
+    <div class="modal fade" id="addLocationModal" tabindex="-1" role="dialog" aria-labelledby="locationModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+            <h4 class="modal-title">Add Location</h4>
+          </div>
+          <div class="modal-body">
+            <form class="form form-horizontal" name="addLocationForm" id="addLocation-form">
+              <div class="form-group">
+                <label class="col-sm-3 control-label" for="name">Name</label>
+                <div class="col-sm-8">
+                  <input ng-model="location.location_name" id="name" name="name" type="text" class="form-control" placeholder="{{location.location_name}}" />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="col-sm-3 control-label" for="name">Description</label>
+                <div class="col-sm-8">
+                  <input ng-model="location.location_description" id="description" name="name" type="text" class="form-control" placeholder="{{location.location_description}}" />
+                </div>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button ng-click="addLocationToDB(location)" type="button" class="btn btn-primary">Ok</button>
+            <button type="button" data-dismiss="modal" class="btn btn-default">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+
+
+ <!--Update Modal Below-->
+    <div class="modal fade" id="addItemModal" tabindex="-1" role="dialog" aria-labelledby="itemModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+            <h4 class="modal-title">Add Item</h4>
+          </div>
+          <div class="modal-body">
+            <form class="form form-horizontal" name="addItemForm" id="addItem-form">
+              <div class="form-group">
+                <label class="col-sm-3 control-label" for="name">Name</label>
+                <div class="col-sm-8">
+                  <input ng-model="item.item_name" id="name" name="name" type="text" class="form-control" placeholder="{{item.item_name}}" />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="col-sm-3 control-label" for="name">Description</label>
+                <div class="col-sm-8">
+                  <input ng-model="item.item_description" id="description" name="name" type="text" class="form-control" placeholder="{{item.item_description}}" />
+                </div>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button ng-click="addItemToDB(item)" type="button" class="btn btn-primary">Ok</button>
+            <button type="button" data-dismiss="modal" class="btn btn-default">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
