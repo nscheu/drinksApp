@@ -38,6 +38,10 @@ My Profile
 
 Account Info
 -------------------
+- First Name
+- Middle Name
+- Last Name
+- Password
 
 My Public Profile
 -------------------
@@ -75,15 +79,18 @@ Use Cases
 5. User edits account information - Account Info View
 6. User deletes account information (partial) - Account Info View
 7. User deletes account information (total - irreversible) - Account Info View
+8. User changes password - Account Info View - Modal Change Password View
 
-8. User adds new recipe - My Profile View - Recipe List - Modal Add Recipe View
-9. User edits recipe - My Profile View - Recipe List  - Modal Edit Recipe View
-10. User deletes recipe - My Profile View - Recipe List  - Confirmation Dialog
+9. User adds new recipe - My Profile View - Recipe List - Modal Add Recipe View
+10. User edits recipe - My Profile View - Recipe List  - Modal Edit Recipe View
+11. User deletes recipe - My Profile View - Recipe List  - Confirmation Dialog
+12. User Publishes Recipe - My Profile View - Recipe List
 
-11. User adds new ingredient - My Profile View - My Bar - Modal Add ingredient View
-12. User edits ingredient - My Profile View - My Bar - Modal Edit ingredient View
-13. User deletes recipe - My Profile View - My Bar - Confirmation Dialog
+13. User adds new ingredient - My Profile View - My Bar - Modal Add ingredient View
+14. User edits ingredient - My Profile View - My Bar - Modal Edit ingredient View
+15. User deletes recipe - My Profile View - My Bar - Confirmation Dialog
 
-14. User generates recipe li
+16. User generates recipe list from Bar Contents - My Bar
+
 
 -------------------
