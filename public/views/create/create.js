@@ -7,7 +7,7 @@
       $http.post('/createUser', user)
         .success(function (user) {
           $rootScope.currentUser = user;
-          console.log(user);
+          //console.log(user);
           $location.url("/profile");
 		    });
       }else{

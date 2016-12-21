@@ -18,7 +18,8 @@
             <th>First Name</th>
             <th>Last Name</th>
             <th>Email</th>
-            <th>Number of Items</th>
+            <th>Recipe List Length</th>
+            <th>Bar List Length</th>
             <th>Actions</th>
 
           </tr>
@@ -30,7 +31,8 @@
             <td>{{currentUser.user_first_name}}</td>
             <td>{{currentUser.user_last_name}}</td>
             <td>{{currentUser.email}}</td>
-            <td>{{currentUser.recipe_list.length}}</td>
+            <td>{{recipe_list.length}}</td>
+            <td>{{bar_list.length}}</td>
             <td><button class="btn btn-warning pull-right" ng-click="openUpdateUserModal(currentUser)">Update
                 </button>
 				        <button class="btn btn-danger pull-right" ng-click="delUser(currentUser)">Delete</button>
@@ -58,13 +60,16 @@
           </tr>
         </thead>
         <tbody>
-          <tr ng-repeat="recipe in currentUser.recipe_list">
+          <tr ng-repeat="recipe in recipe_list">
             <td>{{recipe._id}}</td>
             <td>{{recipe.name}}</td>
             <td>{{recipe.publick}}</td>
             <td>{{recipe.creator}}</td>
             <td>{{recipe.component_list.length()}}</td>
-            <td><button class="btn btn-warning pull-right" ng-click="openUpdateRecipeModal(recipe)">Update
+            <td>
+              <button class="btn btn-warning pull-right" ng-click="alternateRecipeBool(recipe)">Make Public/Private
+                </button>
+              <button class="btn btn-warning pull-right" ng-click="openUpdateRecipeModal(recipe)">Update
                 </button>
                 <button class="btn btn-danger pull-right" ng-click="deleteRecipe(recipe)">Delete</button>
            </td>
@@ -80,7 +85,7 @@
         <thead>
           <tr>
             <th colspan="4" id="tableTitle"><h3>User Bar Data</h3></th>
-            <th><button class="btn btn-success pull-right" ng-click="addLocationModal(currentUser)">Add Ingredient</button></th></tr>
+            <th><button class="btn btn-success pull-right" ng-click="addBarModal(currentUser)">Add Ingredient</button></th></tr>
           <tr>
             <th>ID</th>
             <th>Ingredient Name</th>
@@ -90,14 +95,14 @@
           </tr>
         </thead>
         <tbody>
-          <tr ng-repeat="loc in currentUser.location_list">
+          <tr ng-repeat="ingredient in bar_list">
             <td>{{ingredient._id}}</td>
             <td>{{ingredient.name}}</td>
             <td>{{ingredient.publick}}</td>
             <td>{{ingredient.creator}}</td>
-            <td><button class="btn btn-warning pull-right" ng-click="openUpdateLocationModal(loc)">Update
+            <td><button class="btn btn-warning pull-right" ng-click="openUpdateBarModal(ingredient)">Update
                 </button>
-                <button class="btn btn-danger pull-right" ng-click="delLocation(loc)">Delete</button>
+                <button class="btn btn-danger pull-right" ng-click="deleteIngredient(ingredient)">Delete</button>
            </td>
           </tr>
         </tbody>
@@ -119,12 +124,12 @@
             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
               <span aria-hidden="true">&times;</span>
             </button>
-            <h4 class="modal-title">Edit Location</h4>
+            <h4 class="modal-title">Edit Ingredient</h4>
           </div>
           <div class="modal-body">
             <form class="form form-horizontal" name="locationUpdateForm" id="locationUpdate-form">
               <div class="form-group">
-                <label class="col-sm-3 control-label" for="name">Location Name</label>
+                <label class="col-sm-3 control-label" for="name">Ingredient Name</label>
                 <div class="col-sm-8">
                   <input ng-model="updateLocation.location_name" id="name" name="name" type="text" class="form-control" placeholder="{{updateLocation.location_name}}" />
                 </div>
@@ -152,34 +157,34 @@
 
 
     <!--Update Modal Below-->
-    <div class="modal fade" id="openUpdateItemModal" tabindex="-1" role="dialog" aria-labelledby="openUpdateItemModal" aria-hidden="true">
+    <div class="modal fade" id="openUpdateRecipeModal" tabindex="-1" role="dialog" aria-labelledby="openUpdateRecipeModal" aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
               <span aria-hidden="true">&times;</span>
             </button>
-            <h4 class="modal-title">Edit Item</h4>
+            <h4 class="modal-title">Edit Recipe</h4>
           </div>
           <div class="modal-body">
-            <form class="form form-horizontal" name="itemUpdateForm" id="itemUpdate-form">
+            <form class="form form-horizontal" name="recipeUpdateForm" id="recipeUpdate-form">
               <div class="form-group">
-                <label class="col-sm-3 control-label" for="name">Item Name</label>
+                <label class="col-sm-3 control-label" for="name">Recipe Name</label>
                 <div class="col-sm-8">
-                  <input ng-model="updateItem.item_name" id="name" name="name" type="text" class="form-control" placeholder="{{updateItem.item_name}}" />
+                  <input ng-model="updateRecipe.name" id="name" name="name" type="text" class="form-control" placeholder="{{updateRecipe.name}}" />
                 </div>
               </div>
 
               <div class="form-group">
-                <label class="col-sm-3 control-label" for="name">Item Descriptions</label>
+                <label class="col-sm-3 control-label" for="name">Recipe Components</label>
                 <div class="col-sm-8">
-                  <input ng-model="updateItem.item_description" id="name" name="name" type="text" class="form-control" placeholder="{{updateItem.item_description}}" />
+                  <input ng-model="updateRecipe.publick" id="publick" name="publick" type="text" class="form-control" placeholder="{{updateRecipe.publick}}" />
                 </div>
               </div>
             </form>
           </div>
           <div class="modal-footer">
-            <button ng-click="updateItemInDb(updateItem)" type="button" class="btn btn-primary">Ok</button>
+            <button ng-click="updateRecipeInDb(updateRecipe)" type="button" class="btn btn-primary">Ok</button>
             <button type="button" data-dismiss="modal" class="btn btn-default">Cancel</button>
           </div>
         </div>
@@ -231,34 +236,34 @@
 
 
  <!--Update Modal Below-->
-    <div class="modal fade" id="addLocationModal" tabindex="-1" role="dialog" aria-labelledby="locationModalLabel" aria-hidden="true">
+    <div class="modal fade" id="addBarModal" tabindex="-1" role="dialog" aria-labelledby="barModalLabel" aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
               <span aria-hidden="true">&times;</span>
             </button>
-            <h4 class="modal-title">Add Location</h4>
+            <h4 class="modal-title">Add Bar Ingredient</h4>
           </div>
           <div class="modal-body">
-            <form class="form form-horizontal" name="addLocationForm" id="addLocation-form">
+            <form class="form form-horizontal" name="addBarForm" id="addBar-form">
               <div class="form-group">
                 <label class="col-sm-3 control-label" for="name">Name</label>
                 <div class="col-sm-8">
-                  <input ng-model="location.location_name" id="name" name="name" type="text" class="form-control" placeholder="{{location.location_name}}" />
+                  <input ng-model="component.name" id="name" name="name" type="text" class="form-control" placeholder="{{component.name}}" />
                 </div>
               </div>
 
               <div class="form-group">
-                <label class="col-sm-3 control-label" for="name">Description</label>
+                <label class="col-sm-3 control-label" for="name">Public?</label>
                 <div class="col-sm-8">
-                  <input ng-model="location.location_description" id="description" name="name" type="text" class="form-control" placeholder="{{location.location_description}}" />
+                  <input ng-model="component.publick" id="description" name="name" type="text" class="form-control" placeholder="{{component.publick}}" />
                 </div>
               </div>
             </form>
           </div>
           <div class="modal-footer">
-            <button ng-click="addLocationToDB(location)" type="button" class="btn btn-primary">Ok</button>
+            <button ng-click="addBarToDB(component)" type="button" class="btn btn-primary">Ok</button>
             <button type="button" data-dismiss="modal" class="btn btn-default">Cancel</button>
           </div>
         </div>

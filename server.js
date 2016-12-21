@@ -70,8 +70,8 @@ var UserSchema = new mongoose.Schema({
   user_id: String,
   user_first_name: String,
   user_last_name: String,
-  recipe_list: [RecipeSchema],
-  my_bar_list: [ComponentSchema]
+  //recipe_list: [RecipeSchema],
+  //my_bar_list: [ComponentSchema]
 });
 
 
@@ -208,19 +208,6 @@ app.post('/readUnit', auth, function (req, res) {
   });
 });
 
-// UPDATE Unit
-app.post("/updateUnit", auth, function (req, res) {
-  console.log("server - updateUnit REST");
-  //console.log(req.body._id);
-  //var objId = "ObjectId(" + req.body._id + ")";
-  var query = {"_id": req.body._id};
-  UnitModel.findOneAndUpdate(query, req.body, {upsert: false}, function (err, unit) {
-    if (err) throw err;
-    // we have the updated unit returned to us
-    res.json(unit);
-  });
-});
-
 // DELETE Unit
 app.post('/deleteUnit', auth, function (req, res) {
   //console.log("server - delItem REST");
@@ -231,14 +218,26 @@ app.post('/deleteUnit', auth, function (req, res) {
 });
 
 
-// READ Unit list
+// READ Public Recipe list
+app.post('/rest/public_recipe_list', function (req, res) {
+  RecipeModel.find({ publick: true }, function (err, recipe_list) {
+    res.json(recipe_list);
+  });
+});
+
+// READ Recipe list
 app.post('/rest/recipe_list', auth, function (req, res) {
   RecipeModel.find({ creator: req.body.user_id }, function (err, recipe_list) {
     res.json(recipe_list);
   });
 });
 
-
+// READ Bar list
+app.post('/rest/bar_list', auth, function (req, res) {
+  IngredientModel.find({ creator: req.body.user_id }, function (err, bar_list) {
+    res.json(bar_list);
+  });
+});
 
 
 
@@ -276,6 +275,9 @@ app.post('/deleteComponent', auth, function (req, res) {
   });
 });
 
+
+
+
 // Ingredient
 // API Ingredient CRUD *************************************************************
 // Create Ingredient
@@ -296,7 +298,7 @@ app.post('/createIngredient', function (req, res) {
 });
 // Read Ingredient
 app.get('/readIngredient', auth, function (req, res) {
-  UserModel.find(function (err, ingredient) {
+  IngredientModel.find(function (err, ingredient) {
     res.json(ingredient);
   });
 });
@@ -305,10 +307,16 @@ app.get('/readIngredient', auth, function (req, res) {
 // Delete Ingredient
 app.post('/deleteIngredient', auth, function (req, res) {
   //console.log("server - delete Ingredient REST");
-  ComponentModel.remove({ _id: req.body._id }, function (err, ingredient) {
+  IngredientModel.remove({ _id: req.body._id }, function (err, ingredient) {
     res.json(ingredient);
   });
 });
+
+
+
+
+
+
 
 // Recipe
 // API Recipe CRUD *************************************************************
@@ -328,14 +336,25 @@ app.post('/createRecipe', function (req, res) {
     }
   });
 });
+
 // Read Recipe
 app.get('/readRecipe', auth, function (req, res) {
   UserModel.find(function (err, recipe) {
     res.json(recipe);
   });
 });
+
 // Update Recipe
-// TODO:: Implement
+app.post("/updateRecipe", auth, function (req, res) {
+  console.log("server - updateRecipe REST");
+  var query = {"_id": req.body._id};
+  RecipeModel.findOneAndUpdate(query, req.body, {upsert: false}, function (err, recipe) {
+    if (err) throw err;
+    // we have the updated unit returned to us
+    res.json(recipe);
+  });
+});
+
 // Delete Recipe
 app.post('/deleteRecipe', auth, function (req, res) {
   //console.log("server - delete Recipe REST");

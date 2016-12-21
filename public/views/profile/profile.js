@@ -1,32 +1,28 @@
 ﻿app.controller('ProfileCtrl', function ($scope, $http, $location, $rootScope) {
 
+//console.log($rootScope.currentUser);
 
   $http.post("/rest/recipe_list", { user_id: $scope.currentUser._id })
        .success(function (resource) {
-         console.log(resource);
-         $scope.currentUser.recipe_list = resource;
+         //console.log(resource);
+         $scope.recipe_list = resource;
        });
 
-$http.post("/rest/location_list", { user_id: $scope.currentUser._id })
+  $http.post("/rest/bar_list", { user_id: $scope.currentUser._id })
        .success(function (resource) {
-         console.log(resource);
-         $scope.currentUser.location_list = resource;
+         //console.log(resource);
+         $scope.bar_list = resource;
        });
+
 
   $scope.openUpdateUserModal = function (user) {
     $scope.updateUser = user;
     $("#openUpdateUserModal").modal('show');
   };
-  $scope.openUpdateItemModal = function (item) {
-    $scope.updateItem = item;
-    $("#openUpdateItemModal").modal('show');
+  $scope.openUpdateRecipeModal = function (recipe) {
+    $scope.updateRecipe = recipe;
+    $("#openUpdateRecipeModal").modal('show');
   };
-
-   $scope.openUpdateLocationModal = function (location) {
-    $scope.updateLocation = location;
-    $("#openUpdateLocationModal").modal('show');
-  };
-
 
   //Updates the user
   $scope.updateUserInDb = function (updatedUser) {
@@ -37,45 +33,33 @@ $http.post("/rest/location_list", { user_id: $scope.currentUser._id })
        });
   };
 
-  //Updates the item
-  $scope.updateUnitInDb = function (updatedUnit) {
-    $("#openUpdateUnitModal").modal('hide');
-    console.log(updatedItem);
-    $http.post("/updateUnit", updatedUnit)
+  // Sets the Recipe public value to the opposite
+  $scope.alternateRecipeBool = function (recipe){
+    recipe.publick = !recipe.publick;
+    $scope.updateRecipeInDb(recipe);
+  };
+
+  //Updates the Recipe
+  $scope.updateRecipeInDb = function (updatedRecipe) {
+    $("#openUpdateRecipeModal").modal('hide');
+    //console.log(updatedRecipe);
+    $http.post("/updateRecipe", updatedRecipe)
        .success(function (resource) {
-        console.log(resource);
-         for(var i = 0; i < $scope.currentUser.unit.length; i++){
-          if($scope.currentUser.item_list[i]._id === resource._id){
-            $scope.currentUser.item_list[i] = updatedUnit;
-          }
+        for(var i = 0; i < $scope.recipe_list.length; i++){
+           if($scope.recipe_list[i]._id === resource._id){
+             $scope.recipe_list[i] = updatedRecipe;
+           }
         }
        });
   };
 
-//Updates the Location
-  $scope.updateLocationInDb = function (updatedLocation) {
-    $("#openUpdateLocationModal").modal('hide');
-    console.log(updatedLocation);
-    $http.post("/rest/updateLocation", updatedLocation)
-       .success(function (resource) {
-        console.log(resource);
-         for(var i = 0; i < $scope.currentUser.location_list.length; i++){
-          if($scope.currentUser.location_list[i]._id === resource._id){
-            $scope.currentUser.location_list[i] = updatedLocation;
-          }
-        }
-       });
-  };
 
  //delete user(user)
   $scope.delUser = function (user) {
-    //var index = $scope.users.indexOf(user);
-    console.log("deleteUser - ProfileJS");
-    console.log(user);
-    //$scope.users.splice(index, 1);
+    //console.log("deleteUser - ProfileJS");
     $http.post("/deleteUser", user)
       .success(function (deleteduser) {
-        console.log("deletedUser =", user);
+        //console.log("deletedUser =", user);
         $http.post('/logout')
           .success(function(){
           $scope.currentUser = null;
@@ -89,56 +73,48 @@ $scope.addRecipeModal = function (recipe) {
     $("#addRecipeModal").modal('show');
 };
 
-$scope.addLocationModal = function (location) {
-    $("#addLocationModal").modal('show');
+$scope.addBarModal = function (location) {
+    $("#addBarModal").modal('show');
 };
 
 $scope.addRecipeToDB = function (recipe) {
-  console.log("addRecipe to Db")
+  //console.log("addRecipe to Db")
   $("#addRecipeModal").modal('hide');
-  //var msg = { recipe: recipe, user: $scope.currentUser };
   recipe.creator = $scope.currentUser._id;
-  //console.log(item);
   $http.post('/createRecipe', recipe)
     .success(function (recipe) {
-      console.log("success createRecipe")
-      //$scope.currentUser.item_list.push(item);
-      $scope.currentUser.recipe_list.push(recipe);
-      console.log($scope.currentUser.recipe_list);
+      //console.log("success createRecipe")
+      $scope.recipe_list.push(recipe);
     });
 };
 
-$scope.addLocationToDB = function (location) {
-  console.log("addLocation to Db")
-  $("#addLocationModal").modal('hide');
-  location.user_id = $scope.currentUser._id;
-  $http.post('/createLocation', location)
-    .success(function (location) {
-      console.log("success createItem")
-      $scope.currentUser.location_list.push(location);
+$scope.addBarToDB = function (component) {
+  //console.log("addBar to Db")
+  $("#addBarModal").modal('hide');
+  component.creator = $scope.currentUser._id;
+  $http.post('/createIngredient', component)
+    .success(function (component) {
+      //console.log("success createItem")
+      $scope.bar_list.push(component);
     });
 };
 
 
 $scope.deleteRecipe = function(recipe){
-  //console.log($scope.item_list);
-  var index = $scope.currentUser.recipe_list.indexOf(recipe);
-  $scope.currentUser.recipe_list.splice(index, 1);
-
-  $http.post("/rest/deleteRecipe", recipe)
+  $http.post("/deleteRecipe", recipe)
       .success(function (rec) {
-        console.log("deletedRecipe =", rec);
+        //console.log("deletedRecipe =", rec);
+        var index = $scope.recipe_list.indexOf(recipe);
+        $scope.recipe_list.splice(index, 1);
       });
 }
 
-$scope.delLocation = function(location){
-  console.log($scope.location_list);
-  var index = $scope.currentUser.location_list.indexOf(location);
-  $scope.currentUser.location_list.splice(index, 1);
-
-  $http.post("/rest/delLocation", location)
-      .success(function (loc) {
-        console.log("deletedLocation =", loc);
+$scope.deleteIngredient = function(ingredient){
+  $http.post("/deleteIngredient", ingredient)
+      .success(function (ing) {
+        //console.log("deletedLocation =", ing);
+        var index = $scope.bar_list.indexOf(ingredient);
+        $scope.bar_list.splice(index, 1);
       });
 }
 

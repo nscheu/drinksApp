@@ -13,23 +13,14 @@ app.config(function($routeProvider, $httpProvider) {
         loggedin: checkLoggedIn
       }
     })
-  
    .when('/', {
      templateUrl: '/views/home.html',
-     controller: 'MyItemsApiController'
+     controller: 'HomeCtrl'
    })
     .when('/login', {
     templateUrl: '/views/login/login.html',
     controller: 'LoginCtrl'
     })
-    .when('/profile', {
-    templateUrl: '/views/profile/profile.html',
-    controller: 'ProfileCtrl',
-      resolve: {
-        loggedin: checkLoggedIn
-      }
-    })
-    
     .when('/register', {
       templateUrl: '/views/register/register.html',
       controller: 'RegisterCtrl'
@@ -94,10 +85,12 @@ app.controller('NavCtrl', function ($rootScope, $scope, $http, $location) {
   }
 });
 
-app.controller('HomeCtrl', function($scope) {
-
+app.controller('HomeCtrl', function($scope, $http, $rootScope, $location) {
+    $http.post("/rest/public_recipe_list")
+       .success(function (resource) {
+         $scope.recipes = resource;
+       });
 });
-
 
 
 

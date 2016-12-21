@@ -3,7 +3,7 @@
   <!--<h1>Home</h1>-->
   <div class="thumbnail col-xs-9 col-sm-10 col-md-10 col-lg-12">
     <div ng-show='currentUser'>
-      <br /><div id="welcomeMessage">Hello {{currentUser.pubData.firstName}} {{currentUser.pubData.lastName}}</div>
+      <br /><div id="welcomeMessage" ng-show="currentUser">Hello {{currentUser.user_first_name}} {{currentUser.user_last_name}}</div>
     </div>
 
 
@@ -47,14 +47,25 @@
 
 
     <table class="table">
+      <thead>
+        <tr>
+          <th colspan="4" id="tableTitle">Public Recipes</th>
+        </tr>
+        <tr>
+          <th>Name</th>
+          <th>Public?</th>
+          <th>Creator</th>
+          <th>Actions</th>
+        </tr>
+        
       <tbody>
-        <tr ng-repeat="book in books">
-          <td><img ng-src="{{book.volumeInfo.imageLinks.smallThumbnail}}" class="searchImg"></td>
-          <td>{{book.volumeInfo.title}}</td>
-          <td>{{book.volumeInfo.author}}</td>
-          <!--<td>{{book.author}}</td>-->
+        <tr ng-repeat="recipe in recipes | orderBy:'name'">
+          <!--<td><img ng-src="{{book.volumeInfo.imageLinks.smallThumbnail}}" class="searchImg"></td>-->
+          <td>{{recipe.name}}</td>
+          <td>{{recipe.publick}}</td>
+          <td>{{recipe.creator}}</td>
           <td>
-            <button ng-click="addToFavorites(book)" class="btn btn-warning pull-right">
+            <button ng-click="addToFavorites(book)" ng-show="currentUser" class="btn btn-warning pull-right">
               <span class="glyphicon glyphicon-plus"></span> Add
             </button>
           </td>
