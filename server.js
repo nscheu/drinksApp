@@ -11,7 +11,57 @@ var LocalStrategy = require('passport-local').Strategy;
 var connectionString = process.env.OPENSHIFT_MONGODB_DB_URL || 'mongodb://localhost/';
 var db = mongoose.connect(connectionString);
 
+console.log("Server Running...");
+
 // SCHEMA ********************************
+// User
+// Unit
+// Component
+// Ingredient
+// Recipe
+
+
+// An Ingredient is a user defined ingredient such as orange juice or whisky. 
+// Ingredients may be set to public visibility.
+var IngredientSchema = new mongoose.Schema({
+  //_id: String,
+  name: String,
+  publick: Boolean,
+  creator: String
+});
+
+// A Unit is a unit of measurement.
+// Units may be set to public visibility.
+var UnitSchema = new mongoose.Schema({
+  //_id: String,
+  name: String,
+  shorthand: String,
+  conversionParent: String,
+  conversionParentFactor: Number,
+  publick: Boolean,
+  creator: String,
+});
+
+// A Component is a user defined ingredient such as orange juice or whisky tied to a quantity.
+var ComponentSchema = new mongoose.Schema({
+  //_id: String,
+  name: String,
+  ingredient: IngredientSchema,
+  unit: UnitSchema,
+  quantity: Number,
+  creator: String
+});
+
+var RecipeSchema = new mongoose.Schema({
+  //_id: String,
+  name: String,
+  publick: Boolean,
+  creator: String,
+  component_list: [ComponentSchema],
+});
+
+
+
 
 var UserSchema = new mongoose.Schema({
   username: String,
@@ -20,28 +70,24 @@ var UserSchema = new mongoose.Schema({
   user_id: String,
   user_first_name: String,
   user_last_name: String,
-  item_list: [String],
-  location_list: [String]
+  recipe_list: [RecipeSchema],
+  my_bar_list: [ComponentSchema]
 });
 
-var ItemSchema = new mongoose.Schema({
-  item_id: String,
-  item_name: String,
-  item_description: String,
-  user_id: String
-});
 
-var LocationSchema = new mongoose.Schema({
-  location_id: String,
-  location_name: String,
-  location_description: String,
-  user_id: String
-});
+
+
+
+
+//
+
 
 // DEFINE MONGOOSE MODELS
 var UserModel = mongoose.model('UserModel', UserSchema);
-var ItemModel = mongoose.model('ItemModel', ItemSchema);
-var LocationModel = mongoose.model('LocationModel', LocationSchema);
+var UnitModel = mongoose.model('UnitModel', UnitSchema);
+var ComponentModel = mongoose.model('ComponentModel', ComponentSchema);
+var IngredientModel = mongoose.model('IngredientModel', IngredientSchema);
+var RecipeModel = mongoose.model('RecipeModel', RecipeSchema);
 
 // SET THE MODULES
 app.use(bodyParser.json()); // for parsing application/json
@@ -52,6 +98,7 @@ app.use(cookieParser());
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(express.static(__dirname + '/public'));// GET /style.css etc
+
 
 // PASSPORT FUNCTIONS
 passport.use(new LocalStrategy(
@@ -85,8 +132,8 @@ var auth = function (req, res, next) {
 
 
 // API USER CRUD *************************************************************
-// CREATE
-app.post('/create', function (req, res) {
+// CREATE USER
+app.post('/createUser', function (req, res) {
   UserModel.findOne({ username: req.body.username }, function (err, user) {
     if (user) {
       res.send(200);
@@ -105,18 +152,17 @@ app.post('/create', function (req, res) {
   var newUser = req.body;
 });
 
-// READ
-app.get('/rest/user', auth, function (req, res) {
+// READ USER
+app.get('/readUser', auth, function (req, res) {
   UserModel.find(function (err, user) {
     res.json(user);
   });
 });
 
 
-// UPDATE
-app.post("/api/updateUser", auth, function (req, res) {
-  console.log("server - updateUser REST");
-  //console.log(req.body);
+// UPDATE USER
+app.post("/updateUser", auth, function (req, res) {
+  console.log("Server - updateUser REST");
   UserModel.findOneAndUpdate({ _id: req.body._id }, function (err, user) {
     if (err) throw err;
     // we have the updated user returned to us
@@ -124,8 +170,8 @@ app.post("/api/updateUser", auth, function (req, res) {
   });
 });
 
-// DELETE
-app.post('/rest/delUser', auth, function (req, res) {
+// DELETE USER
+app.post('/deleteUser', auth, function (req, res) {
   //console.log("server - delUser REST");
   UserModel.remove({ _id: req.body._id }, function (err, users) {
     res.json(users);
@@ -134,103 +180,169 @@ app.post('/rest/delUser', auth, function (req, res) {
 
 
 
-// API ITEM CRUD *************************************************************
-// CREATE 
-app.post('/createItem', function (req, res) {
-  console.log('createItem');
-  ItemModel.findOne({ item_name: req.body.item_name }, function (err, item) {
-    if (item) {
+
+
+// Unit
+// API Unit CRUD *************************************************************
+// CREATE Unit
+app.post('/createUnit', function (req, res) {
+  console.log('createUnit');
+  ItemModel.findOne({ item_name: req.body.item_name }, function (err, unit) {
+    if (unit) {
       res.send(200);
     }
     else {
-      var newItem = new ItemModel(req.body);
-
-      newItem.save(function (err, item) {
+      var newUnit = new UnitModel(req.body);
+      newUnit.save(function (err, unit) {
           if (err) { return next(err); }
-          res.json(item);
+          res.json(unit);
       }); 
     }
   });
 });
 
-// READ
-app.post('/rest/item_list', auth, function (req, res) {
-  ItemModel.find({ user_id: req.body.user_id }, function (err, item_list) {
-    res.json(item_list);
+// READ Unit
+app.post('/readUnit', auth, function (req, res) {
+  UnitModel.find(function (err, unit) {
+    res.json(unit);
   });
 });
 
-// UPDATE
-app.post("/rest/updateItem", auth, function (req, res) {
-  console.log("server - updateItem REST");
-  console.log(req.body._id);
+// UPDATE Unit
+app.post("/updateUnit", auth, function (req, res) {
+  console.log("server - updateUnit REST");
+  //console.log(req.body._id);
   //var objId = "ObjectId(" + req.body._id + ")";
   var query = {"_id": req.body._id};
-  ItemModel.findOneAndUpdate(query, req.body, {upsert: false}, function (err, item) {
+  UnitModel.findOneAndUpdate(query, req.body, {upsert: false}, function (err, unit) {
     if (err) throw err;
-    // we have the updated item returned to us
-    res.json(item);
+    // we have the updated unit returned to us
+    res.json(unit);
   });
 });
 
-// DELETE
-app.post('/rest/delItem', auth, function (req, res) {
+// DELETE Unit
+app.post('/deleteUnit', auth, function (req, res) {
   //console.log("server - delItem REST");
-  ItemModel.remove({ _id: req.body._id }, function (err, items) {
-    console.log(items)
-    res.json(items);
+  UnitModel.remove({ _id: req.body._id }, function (err, unit) {
+    console.log(unit)
+    res.json(unit);
   });
 });
 
-// API LOCATION CRUD *************************************************************
-// CREATE 
-app.post('/createLocation', function (req, res) {
-  console.log('createLocation');
-  LocationModel.findOne({ location_name: req.body.location_name }, function (err, location) {
-    if (location) {
+
+// READ Unit list
+app.post('/rest/recipe_list', auth, function (req, res) {
+  RecipeModel.find({ creator: req.body.user_id }, function (err, recipe_list) {
+    res.json(recipe_list);
+  });
+});
+
+
+
+
+
+// Component
+// API Component CRUD *************************************************************
+// Create Component
+app.post('/createComponent', function (req, res) {
+  console.log('createComponent');
+  ComponentModel.findOne({ _id: req.body._id }, function (err, component) {
+    if (component) {
       res.send(200);
     }
     else {
-      var newLocation = new LocationModel(req.body);
-
-      newLocation.save(function (err, location) {
+      var newComponent = new ComponentModel(req.body);
+      newComponent.save(function (err, component) {
           if (err) { return next(err); }
-          res.json(location);
+          res.json(component);
       }); 
     }
   });
 });
-
-// READ
-app.post('/rest/location_list', auth, function (req, res) {
-  LocationModel.find({ user_id: req.body.user_id }, function (err, location_list) {
-    res.json(location_list);
+// Read Component
+app.get('/readComponent', auth, function (req, res) {
+  ComponentModel.find(function (err, component) {
+    res.json(component);
+  });
+});
+// Update Component
+//  TODO:: Implement
+// Delete Component
+app.post('/deleteComponent', auth, function (req, res) {
+  //console.log("server - Delete Component REST");
+  ComponentModel.remove({ _id: req.body._id }, function (err, component) {
+    res.json(component);
   });
 });
 
-// UPDATE
-app.post("/rest/updateLocation", auth, function (req, res) {
-  console.log("server - updateLocation REST");
-  console.log(req.body._id);
-  var query = {"_id": req.body._id};
-  LocationModel.findOneAndUpdate(query, req.body, {upsert: false}, function (err, location) {
-    if (err) throw err;
-    // we have the updated item returned to us
-    res.json(location);
+// Ingredient
+// API Ingredient CRUD *************************************************************
+// Create Ingredient
+app.post('/createIngredient', function (req, res) {
+  console.log('createIngredient');
+  IngredientModel.findOne({ _id: req.body._id }, function (err, ingredient) {
+    if (ingredient) {
+      res.send(200);
+    }
+    else {
+      var newIngredient = new IngredientModel(req.body);
+      newIngredient.save(function (err, ingredient) {
+          if (err) { return next(err); }
+          res.json(ingredient);
+      }); 
+    }
+  });
+});
+// Read Ingredient
+app.get('/readIngredient', auth, function (req, res) {
+  UserModel.find(function (err, ingredient) {
+    res.json(ingredient);
+  });
+});
+// Update Ingredient
+//  TODO:: Implement
+// Delete Ingredient
+app.post('/deleteIngredient', auth, function (req, res) {
+  //console.log("server - delete Ingredient REST");
+  ComponentModel.remove({ _id: req.body._id }, function (err, ingredient) {
+    res.json(ingredient);
   });
 });
 
-// DELETE
-app.post('/rest/delLocation', auth, function (req, res) {
-  LocationModel.remove({ _id: req.body._id }, function (err, location) {
-    //console.log(location);
-    res.json(location);
+// Recipe
+// API Recipe CRUD *************************************************************
+// Create Recipe
+app.post('/createRecipe', function (req, res) {
+  console.log('createRecipe');
+  RecipeModel.findOne({ _id: req.body._id }, function (err, recipe) {
+    if (recipe) {
+      res.send(200);
+    }
+    else {
+      var newRecipe = new RecipeModel(req.body);
+      newRecipe.save(function (err, recipe) {
+          if (err) { return next(err); }
+          res.json(recipe);
+      }); 
+    }
   });
 });
-
-
-
-
+// Read Recipe
+app.get('/readRecipe', auth, function (req, res) {
+  UserModel.find(function (err, recipe) {
+    res.json(recipe);
+  });
+});
+// Update Recipe
+// TODO:: Implement
+// Delete Recipe
+app.post('/deleteRecipe', auth, function (req, res) {
+  //console.log("server - delete Recipe REST");
+  RecipeModel.remove({ _id: req.body._id }, function (err, recipe) {
+    res.json(recipe);
+  });
+});
 
 
 
@@ -243,8 +355,9 @@ app.get('/hello', function (req, res) {
   res.send('hello world');
 });
 
-// LOGIN MANAGMENT API
 
+
+// LOGIN MANAGMENT API
 app.post('/login', passport.authenticate('local'), function (req, res) {
   console.log(req.user);
   res.send(req.user);

@@ -21,13 +21,15 @@ Unit {
 }
 
 
-A Component is a user defined ingredient such as orange juice or whisky. Components may be set to public visibility.
+A Component is a user defined ingredient such as orange juice or whisky and a quantity in units. Components may be set to public visibility.
 
 Component {
 	name: "OJ",
 	public: true, // Public: false will be default for component,
 	creator: 110398883 // UserID
 }
+
+An Ingredient is a user defined ingredient such as orange juice or whisky.
 
 My Profile
 -------------------

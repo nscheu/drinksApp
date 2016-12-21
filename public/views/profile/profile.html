@@ -30,7 +30,7 @@
             <td>{{currentUser.user_first_name}}</td>
             <td>{{currentUser.user_last_name}}</td>
             <td>{{currentUser.email}}</td>
-            <td>{{currentUser.item_list.length}}</td>
+            <td>{{currentUser.recipe_list.length}}</td>
             <td><button class="btn btn-warning pull-right" ng-click="openUpdateUserModal(currentUser)">Update
                 </button>
 				        <button class="btn btn-danger pull-right" ng-click="delUser(currentUser)">Delete</button>
@@ -46,25 +46,27 @@
       <table class="table">
         <thead>
           <tr>
-            <th colspan="4" id="tableTitle"><h3>User Item Data</h3></th>
-            <th><button class="btn btn-success pull-right" ng-click="addItemModal(currentUser)">Add Item</button></th></tr>
+            <th colspan="5" id="tableTitle"><h3>User Recipe Data</h3></th>
+            <th><button class="btn btn-success pull-right" ng-click="addRecipeModal(currentUser)">Add Recipe</button></th></tr>
           <tr>
             <th>ID</th>
-            <th>Item Name</th>
-            <th>Item Description</th>
-            <th>Item Owner</th>
+            <th>Recipe Name</th>
+            <th>Recipe Public?</th>
+            <th>Recipe Creator</th>
+            <th>Recipe Comp List Length</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          <tr ng-repeat="item in currentUser.item_list">
-            <td>{{item._id}}</td>
-            <td>{{item.item_name}}</td>
-            <td>{{item.item_description}}</td>
-            <td>{{item.user_id}}</td>
-            <td><button class="btn btn-warning pull-right" ng-click="openUpdateItemModal(item)">Update
+          <tr ng-repeat="recipe in currentUser.recipe_list">
+            <td>{{recipe._id}}</td>
+            <td>{{recipe.name}}</td>
+            <td>{{recipe.publick}}</td>
+            <td>{{recipe.creator}}</td>
+            <td>{{recipe.component_list.length()}}</td>
+            <td><button class="btn btn-warning pull-right" ng-click="openUpdateRecipeModal(recipe)">Update
                 </button>
-                <button class="btn btn-danger pull-right" ng-click="delItem(item)">Delete</button>
+                <button class="btn btn-danger pull-right" ng-click="deleteRecipe(recipe)">Delete</button>
            </td>
           </tr>
         </tbody>
@@ -77,22 +79,22 @@
       <table class="table">
         <thead>
           <tr>
-            <th colspan="4" id="tableTitle"><h3>User Location Data</h3></th>
-            <th><button class="btn btn-success pull-right" ng-click="addLocationModal(currentUser)">Add Location</button></th></tr>
+            <th colspan="4" id="tableTitle"><h3>User Bar Data</h3></th>
+            <th><button class="btn btn-success pull-right" ng-click="addLocationModal(currentUser)">Add Ingredient</button></th></tr>
           <tr>
             <th>ID</th>
-            <th>Location Name</th>
-            <th>Location Description</th>
-            <th>Item Owner</th>
+            <th>Ingredient Name</th>
+            <th>Ingredient Public?</th>
+            <th>Ingredient Owner</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
           <tr ng-repeat="loc in currentUser.location_list">
-            <td>{{loc._id}}</td>
-            <td>{{loc.location_name}}</td>
-            <td>{{loc.location_description}}</td>
-            <td>{{loc.user_id}}</td>
+            <td>{{ingredient._id}}</td>
+            <td>{{ingredient.name}}</td>
+            <td>{{ingredient.publick}}</td>
+            <td>{{ingredient.creator}}</td>
             <td><button class="btn btn-warning pull-right" ng-click="openUpdateLocationModal(loc)">Update
                 </button>
                 <button class="btn btn-danger pull-right" ng-click="delLocation(loc)">Delete</button>
@@ -267,34 +269,36 @@
 
 
  <!--Update Modal Below-->
-    <div class="modal fade" id="addItemModal" tabindex="-1" role="dialog" aria-labelledby="itemModalLabel" aria-hidden="true">
+    <div class="modal fade" id="addRecipeModal" tabindex="-1" role="dialog" aria-labelledby="recipeModalLabel" aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
               <span aria-hidden="true">&times;</span>
             </button>
-            <h4 class="modal-title">Add Item</h4>
+            <h4 class="modal-title">Add Recipe</h4>
           </div>
           <div class="modal-body">
-            <form class="form form-horizontal" name="addItemForm" id="addItem-form">
+            <form class="form form-horizontal" name="addRecipeForm" id="addRecipe-form">
               <div class="form-group">
                 <label class="col-sm-3 control-label" for="name">Name</label>
                 <div class="col-sm-8">
-                  <input ng-model="item.item_name" id="name" name="name" type="text" class="form-control" placeholder="{{item.item_name}}" />
+                  <input ng-model="recipe.name" id="name" name="name" type="text" class="form-control" placeholder="{{recipe.name}}" />
                 </div>
               </div>
 
               <div class="form-group">
-                <label class="col-sm-3 control-label" for="name">Description</label>
+                <label class="col-sm-3 control-label" for="name">Public?</label>
                 <div class="col-sm-8">
-                  <input ng-model="item.item_description" id="description" name="name" type="text" class="form-control" placeholder="{{item.item_description}}" />
+                  <input ng-model="recipe.publick" id="publick" name="publick" type="text" class="form-control" placeholder="{{recipe.publick}}" />
                 </div>
+                <button class="btn btn-warning pull-right" ng-click="addNewComponent(recipe)">+
+                </button>
               </div>
             </form>
           </div>
           <div class="modal-footer">
-            <button ng-click="addItemToDB(item)" type="button" class="btn btn-primary">Ok</button>
+            <button ng-click="addRecipeToDB(recipe)" type="button" class="btn btn-primary">Ok</button>
             <button type="button" data-dismiss="modal" class="btn btn-default">Cancel</button>
           </div>
         </div>

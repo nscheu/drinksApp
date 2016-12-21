@@ -1,10 +1,10 @@
 ﻿app.controller('ProfileCtrl', function ($scope, $http, $location, $rootScope) {
 
 
-  $http.post("/rest/item_list", { user_id: $scope.currentUser._id })
+  $http.post("/rest/recipe_list", { user_id: $scope.currentUser._id })
        .success(function (resource) {
          console.log(resource);
-         $scope.currentUser.item_list = resource;
+         $scope.currentUser.recipe_list = resource;
        });
 
 $http.post("/rest/location_list", { user_id: $scope.currentUser._id })
@@ -31,22 +31,22 @@ $http.post("/rest/location_list", { user_id: $scope.currentUser._id })
   //Updates the user
   $scope.updateUserInDb = function (updatedUser) {
     $("#openUpdateUserModal").modal('hide');
-    $http.post("/api/updateUser", updatedUser)
+    $http.post("/updateUser", updatedUser)
        .success(function (resource) {
          $scope.currentUser = resource;
        });
   };
 
   //Updates the item
-  $scope.updateItemInDb = function (updatedItem) {
-    $("#openUpdateItemModal").modal('hide');
+  $scope.updateUnitInDb = function (updatedUnit) {
+    $("#openUpdateUnitModal").modal('hide');
     console.log(updatedItem);
-    $http.post("/rest/updateItem", updatedItem)
+    $http.post("/updateUnit", updatedUnit)
        .success(function (resource) {
         console.log(resource);
-         for(var i = 0; i < $scope.currentUser.item_list.length; i++){
+         for(var i = 0; i < $scope.currentUser.unit.length; i++){
           if($scope.currentUser.item_list[i]._id === resource._id){
-            $scope.currentUser.item_list[i] = updatedItem;
+            $scope.currentUser.item_list[i] = updatedUnit;
           }
         }
        });
@@ -70,10 +70,10 @@ $http.post("/rest/location_list", { user_id: $scope.currentUser._id })
  //delete user(user)
   $scope.delUser = function (user) {
     //var index = $scope.users.indexOf(user);
-    console.log("delUser - ProfileJS");
+    console.log("deleteUser - ProfileJS");
     console.log(user);
     //$scope.users.splice(index, 1);
-    $http.post("/rest/delUser", user)
+    $http.post("/deleteUser", user)
       .success(function (deleteduser) {
         console.log("deletedUser =", user);
         $http.post('/logout')
@@ -85,24 +85,26 @@ $http.post("/rest/location_list", { user_id: $scope.currentUser._id })
       });
   };
 
-$scope.addItemModal = function (item) {
-    $("#addItemModal").modal('show');
+$scope.addRecipeModal = function (recipe) {
+    $("#addRecipeModal").modal('show');
 };
 
 $scope.addLocationModal = function (location) {
     $("#addLocationModal").modal('show');
 };
 
-$scope.addItemToDB = function (item) {
-  console.log("addItem to Db")
-  $("#addItemModal").modal('hide');
-  //var msg = { item: item, user: $scope.currentUser };
-  item.user_id = $scope.currentUser._id;
+$scope.addRecipeToDB = function (recipe) {
+  console.log("addRecipe to Db")
+  $("#addRecipeModal").modal('hide');
+  //var msg = { recipe: recipe, user: $scope.currentUser };
+  recipe.creator = $scope.currentUser._id;
   //console.log(item);
-  $http.post('/createItem', item)
-    .success(function (item) {
-      console.log("success createItem")
-      $scope.currentUser.item_list.push(item);
+  $http.post('/createRecipe', recipe)
+    .success(function (recipe) {
+      console.log("success createRecipe")
+      //$scope.currentUser.item_list.push(item);
+      $scope.currentUser.recipe_list.push(recipe);
+      console.log($scope.currentUser.recipe_list);
     });
 };
 
@@ -118,15 +120,14 @@ $scope.addLocationToDB = function (location) {
 };
 
 
-$scope.delItem = function(item){
-  console.log($scope.item_list);
-  var index = $scope.currentUser.item_list.indexOf(item);
-  $scope.currentUser.item_list.splice(index, 1);
+$scope.deleteRecipe = function(recipe){
+  //console.log($scope.item_list);
+  var index = $scope.currentUser.recipe_list.indexOf(recipe);
+  $scope.currentUser.recipe_list.splice(index, 1);
 
-  $http.post("/rest/delItem", item)
-      .success(function (it) {
-        console.log("deletedItem =", it);
-       
+  $http.post("/rest/deleteRecipe", recipe)
+      .success(function (rec) {
+        console.log("deletedRecipe =", rec);
       });
 }
 
