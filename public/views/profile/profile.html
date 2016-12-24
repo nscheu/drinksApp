@@ -162,7 +162,7 @@
             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
               <span aria-hidden="true">&times;</span>
             </button>
-            <h4 class="modal-title">Edit Recipe</h4>
+            <h4 class="modal-title">Update Recipe</h4>
           </div>
           <div class="modal-body">
             <form class="form form-horizontal" name="recipeUpdateForm" id="recipeUpdate-form">
@@ -173,12 +173,22 @@
                 </div>
               </div>
 
+              
+
               <div class="form-group">
-                <label class="col-sm-3 control-label" for="name">Recipe Components</label>
+                <label class="col-sm-3 control-label" for="name">Public?</label>
                 <div class="col-sm-8">
-                  <input ng-model="updateRecipe.publick" id="publick" name="publick" type="text" class="form-control" placeholder="{{updateRecipe.publick}}" />
-                </div>
+                  <fieldset  data-ng-repeat="comp in updateRecipe.component_list">
+                  <input type="number" class="numInput" ng-model="comp.quantity" name="">
+                  <select ng-model="comp.unit._id"  ng-options="x.name for x in units"></select>
+                  <input type="text" ng-model="comp.name" name="">
+                  <button class="remove" ng-show="$last" ng-click="removeChoice()">-</button>
+               </fieldset>
+                  </div>
+                <button class="btn btn-warning" ng-click="addNewChoice()">+
+                </button>
               </div>
+
             </form>
           </div>
           <div class="modal-footer">
@@ -297,7 +307,7 @@
                 <div class="col-sm-8">
                   <fieldset  data-ng-repeat="comp in recipeComponents">
                   <input type="number" class="numInput" ng-model="comp.quantity" name="">
-                  <select ng-model="comp.unit"  ng-options="x.name for x in units"></select>
+                  <select ng-model="comp.unit_id"  ng-options="x._id as x.name for x in units"></select>
                   <input type="text" ng-model="comp.name" name="">
                   <button class="remove" ng-show="$last" ng-click="removeChoice()">-</button>
                </fieldset>

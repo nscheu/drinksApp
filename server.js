@@ -12,7 +12,7 @@ mongoose.Promise = global.Promise;
 var connectionString = process.env.OPENSHIFT_MONGODB_DB_URL || 'mongodb://localhost/';
 var db = mongoose.connect(connectionString);
 
-//var ObjectID = require('mongodb').ObjectID;
+var ObjectID = require('mongodb').ObjectID;
 //req.body._id = new ObjectID()
 
 console.log("Server Running...");
@@ -101,7 +101,9 @@ units.push(oz);
 units.push(cup);
 
 
-//
+for(var un in units){
+  units[un]._id = new ObjectID();
+}
 
 
 // DEFINE MONGOOSE MODELS
@@ -398,6 +400,9 @@ app.post('/createComponentFromList', function (req, res) {
 // Create Recipe
 app.post('/createRecipe', function (req, res) {
   console.log('createRecipe');
+  // for(var comp in req.body.component_list){
+  //   req.body.component_list[comp].unit._id = new ObjectID();
+  // }
   var newRecipe = new RecipeModel(req.body);
   newRecipe.save(function (err, data) {
     if(err){ 
@@ -410,69 +415,6 @@ app.post('/createRecipe', function (req, res) {
     }
   });
 });
-
-
-// 
-// app.post('/createRecipe', function (req, res, next) {
-//   console.log('createRecipe');
-//   console.log(req.body);
-//   var recipe = req.body.recipe;
-//   var componentList = req.body.compList;
-//   console.log(recipe);
-//   console.log(componentList);
-//   var returnResponse = [];
-//   RecipeModel.findOne({ _id: req.body._id }, function (err, recipe) {
-//     if (recipe) {
-//       res.send(200);
-//     }
-//     else {
-//       var newRecipe = new RecipeModel(recipe);
-//       newRecipe.save(function (err, recipe) {
-//           if (err) { return next(err); }
-//           //createComponentFromList(componentList);
-//           console.log("RECIPE SAVED SAFELY ::");
-//           console.log(recipe);
-//           console.log("RR");
-//           returnResponse.push(recipe);
-//           console.log(returnResponse);
-//           async.forEach(componentList, function(component, callback) { 
-//           //The second argument, `callback`, is the "task callback" for a specific `messageId`
-//                 //When the db has deleted the item it will call the "task callback"
-//                 //This way async knows which items in the collection have finished
-//                 //db.delete('messages', component, callback);
-//                 var newComponent = new ComponentModel(component);
-//                     newComponent.save(function (err, component) {
-//                       if (err) { return next(err); }
-//                         //res.json(component);
-//                         console.log("SAVING COMPONENT ::");
-//                         console.log("RR");
-                        
-//                         //console.log(component);
-//                         returnResponse.push(component);
-//                         console.log(returnResponse);
-//                     }); 
-//             }, function(err) {
-//                 if (err) return next(err);
-//                 console.log("SOME OTHER ERROR AVOIDED!");
-//                 //Tell the user about the great success
-//                 // res.json({
-//                 //     success: true,
-//                 //     message: componentList.length+' component was saved.',
-//                 //     recipe: recipe
-//                 // });
-//                 returnResponse.push(component);
-//             });
-
-//           //res.json(recipe);
-          
-//           console.log("RR - SERVER RESPONSE");
-//           console.log(returnResponse);
-//           res.json(returnResponse);
-//       }); 
-//     }
-//   });
-
-// });
 
 // Read Recipe
 app.get('/readRecipe', auth, function (req, res) {
@@ -487,7 +429,7 @@ app.post("/updateRecipe", auth, function (req, res) {
   var query = {"_id": req.body._id};
   RecipeModel.findOneAndUpdate(query, req.body, {upsert: false}, function (err, recipe) {
     if (err) throw err;
-    // we have the updated unit returned to us
+    // we have the updated recipe returned to us
     res.json(recipe);
   });
 });

@@ -1,5 +1,9 @@
-﻿app.controller('ProfileCtrl', function ($scope, $http, $location, $rootScope) {
+﻿
 
+app.controller('ProfileCtrl', function ($scope, $http, $location, $rootScope) {
+
+//var ObjectID = require('mongodb').ObjectID;
+//req.body._id = new ObjectID()
 //console.log($rootScope.currentUser);
 
 
@@ -48,6 +52,7 @@
   };
   $scope.openUpdateRecipeModal = function (recipe) {
     $scope.updateRecipe = recipe;
+    console.log(recipe);
     $("#openUpdateRecipeModal").modal('show');
   };
 
@@ -105,64 +110,44 @@ $scope.addBarModal = function (location) {
 };
 
 $scope.addRecipeToDB = function (recipe, componentList) {
-  //console.log("addRecipe to Db")
   $("#addRecipeModal").modal('hide');
-  //console.log(componentList.unit.name);
   recipe.creator = $scope.currentUser._id;
   recipe.publick = false;
-
-  //console.log(componentList);
+  console.log(componentList);
   for(var comp in componentList){
     componentList[comp].creator = $scope.currentUser._id;
-    componentList[comp].unit.creator = $scope.currentUser._id;
-    //console.log(componentList[comp]);
-    //var unitName = componentList[comp].unit.name;
-    //componentList[comp].unit =
-    
+    //componentList[comp].unit.creator = $scope.currentUser._id;
+    //componentList[comp].unit_id = componentList[comp].unit._id;
+    //componentList[comp].unit._id = new ObjectID();
   }
-
-  //console.log(componentList);
-  // var recipePacket = {
-  //   recipe: recipe,
-  //   compList: componentList
-  // }
-  
   recipe.component_list = componentList;
 
-  //$http.post('/createRecipe', recipePacket)
-  $http.post('/createRecipe', recipe)
-    .success(function (resp) {
-      //console.log("success createRecipe")
-      console.log(resp);
+  $http.post('/createRecipe', recipe).success(function (resp) {
       $scope.recipe_list.push(resp);
-    });
+  });
+  $scope.recipeComponents = [];
 };
 
 $scope.addBarToDB = function (component) {
-  //console.log("addBar to Db")
   $("#addBarModal").modal('hide');
   component.creator = $scope.currentUser._id;
-  $http.post('/createIngredient', component)
-    .success(function (component) {
-      //console.log("success createItem")
+  $http.post('/createIngredient', component).success(function (component) {
       $scope.bar_list.push(component);
     });
+  $scope.recipeComponents = [];
 };
 
 
 $scope.deleteRecipe = function(recipe){
   $http.post("/deleteRecipe", recipe)
       .success(function (rec) {
-        //console.log("deletedRecipe =", rec);
         var index = $scope.recipe_list.indexOf(recipe);
         $scope.recipe_list.splice(index, 1);
       });
 }
 
 $scope.deleteIngredient = function(ingredient){
-  $http.post("/deleteIngredient", ingredient)
-      .success(function (ing) {
-        //console.log("deletedLocation =", ing);
+  $http.post("/deleteIngredient", ingredient).success(function (ing) {
         var index = $scope.bar_list.indexOf(ingredient);
         $scope.bar_list.splice(index, 1);
       });
