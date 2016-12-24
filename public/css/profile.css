@@ -35,8 +35,17 @@ body {
     color: antiquewhite;
 	}
 
+  body .modal {
+    color: black;
+  }
+
+  body .modal .numInput{
+    width: 45px;
+  }
+
 	html { 
- 	 background: url(../img/sea-ocean-sailing-ship-boat.jpg) no-repeat center center fixed;
+ 	 /* background: url(../img/sea-ocean-sailing-ship-boat.jpg) no-repeat center center fixed; */
+   background: url(../img/beer.jpeg) no-repeat center center fixed;
  	 -webkit-background-size: cover;
  	 -moz-binding: cover;
  	 -o-background-size: cover;

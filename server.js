@@ -7,9 +7,13 @@ var passport = require('passport');
 var cookieParser = require('cookie-parser');
 var session = require('express-session');
 var LocalStrategy = require('passport-local').Strategy;
-
+var async = require('async');
+mongoose.Promise = global.Promise;
 var connectionString = process.env.OPENSHIFT_MONGODB_DB_URL || 'mongodb://localhost/';
 var db = mongoose.connect(connectionString);
+
+//var ObjectID = require('mongodb').ObjectID;
+//req.body._id = new ObjectID()
 
 console.log("Server Running...");
 
@@ -46,8 +50,9 @@ var UnitSchema = new mongoose.Schema({
 var ComponentSchema = new mongoose.Schema({
   //_id: String,
   name: String,
-  ingredient: IngredientSchema,
-  unit: UnitSchema,
+  unit: Object,
+  ingredient_id: String,
+  unit_id: String,
   quantity: Number,
   creator: String
 });
@@ -57,11 +62,8 @@ var RecipeSchema = new mongoose.Schema({
   name: String,
   publick: Boolean,
   creator: String,
-  component_list: [ComponentSchema],
+  component_list: [],
 });
-
-
-
 
 var UserSchema = new mongoose.Schema({
   username: String,
@@ -75,8 +77,28 @@ var UserSchema = new mongoose.Schema({
 });
 
 
+//Starter Dummy Data
+var units = [];
 
 
+var oz = {
+  name: "Ounce",
+  shorthand: "Oz",
+  conversionParent: "Quart",
+  conversionParentFactor: 32,
+  publick: true,
+  creator: "Default",
+};
+var cup = {
+  name: "Cup",
+  shorthand: "cu",
+  conversionParent: "Quart",
+  conversionParentFactor: 4,
+  publick: true,
+  creator: "Default",
+};
+units.push(oz);
+units.push(cup);
 
 
 //
@@ -218,6 +240,17 @@ app.post('/deleteUnit', auth, function (req, res) {
 });
 
 
+
+
+
+// READ Public Units list
+app.post('/rest/unit_list', function (req, res) {
+  UnitModel.find({ publick: true }, function (err, recipe_list) {
+    // THIS -> res.json(recipe_list);
+    res.json(units);
+  });
+});
+
 // READ Public Recipe list
 app.post('/rest/public_recipe_list', function (req, res) {
   RecipeModel.find({ publick: true }, function (err, recipe_list) {
@@ -313,8 +346,50 @@ app.post('/deleteIngredient', auth, function (req, res) {
 });
 
 
+// Create Component
+app.post('/createComponentFromList', function (req, res) {
+  console.log('createComponent');
+  ComponentModel.findOne({ _id: req.body._id }, function (err, component) {
+    if (component) {
+      res.send(200);
+    }
+    else {
+      var newComponent = new ComponentModel(req.body);
+      newComponent.save(function (err, component) {
+          if (err) { return next(err); }
+          res.json(component);
+      }); 
+    }
+  });
+});
 
-
+// var createComponentFromList = function(componentList){
+//   async.forEach(componentList, function(component, callback) { 
+//   //The second argument, `callback`, is the "task callback" for a specific `messageId`
+//         //When the db has deleted the item it will call the "task callback"
+//         //This way async knows which items in the collection have finished
+//         //db.delete('messages', component, callback);
+//         ComponentModel.findOne({ _id: component._id }, function (err, component) {
+//           if (component) {
+//             res.send(200);
+//           }
+//           else {
+//             var newComponent = new ComponentModel(component);
+//             newComponent.save(function (err, component) {
+//               if (err) { return next(err); }
+//                 res.json(component);
+//             }); 
+//           }
+//         });
+//     }, function(err) {
+//         if (err) return next(err);
+//         //Tell the user about the great success
+//         res.json({
+//             success: true,
+//             message: componentList.length+' component was saved.'
+//         });
+//     });
+// };
 
 
 
@@ -323,19 +398,81 @@ app.post('/deleteIngredient', auth, function (req, res) {
 // Create Recipe
 app.post('/createRecipe', function (req, res) {
   console.log('createRecipe');
-  RecipeModel.findOne({ _id: req.body._id }, function (err, recipe) {
-    if (recipe) {
-      res.send(200);
+  var newRecipe = new RecipeModel(req.body);
+  newRecipe.save(function (err, data) {
+    if(err){ 
+      console.log(err);
+      res.json(err);
     }
-    else {
-      var newRecipe = new RecipeModel(req.body);
-      newRecipe.save(function (err, recipe) {
-          if (err) { return next(err); }
-          res.json(recipe);
-      }); 
+    else { 
+      console.log('Saved : ', data );
+      res.json(data);
     }
   });
 });
+
+
+// 
+// app.post('/createRecipe', function (req, res, next) {
+//   console.log('createRecipe');
+//   console.log(req.body);
+//   var recipe = req.body.recipe;
+//   var componentList = req.body.compList;
+//   console.log(recipe);
+//   console.log(componentList);
+//   var returnResponse = [];
+//   RecipeModel.findOne({ _id: req.body._id }, function (err, recipe) {
+//     if (recipe) {
+//       res.send(200);
+//     }
+//     else {
+//       var newRecipe = new RecipeModel(recipe);
+//       newRecipe.save(function (err, recipe) {
+//           if (err) { return next(err); }
+//           //createComponentFromList(componentList);
+//           console.log("RECIPE SAVED SAFELY ::");
+//           console.log(recipe);
+//           console.log("RR");
+//           returnResponse.push(recipe);
+//           console.log(returnResponse);
+//           async.forEach(componentList, function(component, callback) { 
+//           //The second argument, `callback`, is the "task callback" for a specific `messageId`
+//                 //When the db has deleted the item it will call the "task callback"
+//                 //This way async knows which items in the collection have finished
+//                 //db.delete('messages', component, callback);
+//                 var newComponent = new ComponentModel(component);
+//                     newComponent.save(function (err, component) {
+//                       if (err) { return next(err); }
+//                         //res.json(component);
+//                         console.log("SAVING COMPONENT ::");
+//                         console.log("RR");
+                        
+//                         //console.log(component);
+//                         returnResponse.push(component);
+//                         console.log(returnResponse);
+//                     }); 
+//             }, function(err) {
+//                 if (err) return next(err);
+//                 console.log("SOME OTHER ERROR AVOIDED!");
+//                 //Tell the user about the great success
+//                 // res.json({
+//                 //     success: true,
+//                 //     message: componentList.length+' component was saved.',
+//                 //     recipe: recipe
+//                 // });
+//                 returnResponse.push(component);
+//             });
+
+//           //res.json(recipe);
+          
+//           console.log("RR - SERVER RESPONSE");
+//           console.log(returnResponse);
+//           res.json(returnResponse);
+//       }); 
+//     }
+//   });
+
+// });
 
 // Read Recipe
 app.get('/readRecipe', auth, function (req, res) {

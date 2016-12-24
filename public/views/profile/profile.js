@@ -2,6 +2,20 @@
 
 //console.log($rootScope.currentUser);
 
+
+  $http.post("/rest/unit_list")
+       .success(function (resource) {
+         //console.log(resource);
+         $scope.units = resource;
+         console.log($scope.units);
+       });
+
+  // $http.post("/rest/recipe_list", { user_id: $scope.currentUser._id })
+  //      .success(function (resource) {
+  //        //console.log(resource);
+  //        $scope.recipeComponents = resource;
+  //      });
+
   $http.post("/rest/recipe_list", { user_id: $scope.currentUser._id })
        .success(function (resource) {
          //console.log(resource);
@@ -13,6 +27,19 @@
          //console.log(resource);
          $scope.bar_list = resource;
        });
+
+  $scope.recipeComponents = [{id: 'comp1'}];
+  
+  $scope.addNewChoice = function() {
+    var newItemNo = $scope.recipeComponents.length+1;
+    $scope.recipeComponents.push({'id':'comp'+newItemNo});
+  };
+    
+  $scope.removeChoice = function() {
+    var lastItem = $scope.recipeComponents.length-1;
+    $scope.recipeComponents.splice(lastItem);
+  };
+
 
 
   $scope.openUpdateUserModal = function (user) {
@@ -77,14 +104,37 @@ $scope.addBarModal = function (location) {
     $("#addBarModal").modal('show');
 };
 
-$scope.addRecipeToDB = function (recipe) {
+$scope.addRecipeToDB = function (recipe, componentList) {
   //console.log("addRecipe to Db")
   $("#addRecipeModal").modal('hide');
+  //console.log(componentList.unit.name);
   recipe.creator = $scope.currentUser._id;
+  recipe.publick = false;
+
+  //console.log(componentList);
+  for(var comp in componentList){
+    componentList[comp].creator = $scope.currentUser._id;
+    componentList[comp].unit.creator = $scope.currentUser._id;
+    //console.log(componentList[comp]);
+    //var unitName = componentList[comp].unit.name;
+    //componentList[comp].unit =
+    
+  }
+
+  //console.log(componentList);
+  // var recipePacket = {
+  //   recipe: recipe,
+  //   compList: componentList
+  // }
+  
+  recipe.component_list = componentList;
+
+  //$http.post('/createRecipe', recipePacket)
   $http.post('/createRecipe', recipe)
-    .success(function (recipe) {
+    .success(function (resp) {
       //console.log("success createRecipe")
-      $scope.recipe_list.push(recipe);
+      console.log(resp);
+      $scope.recipe_list.push(resp);
     });
 };
 
